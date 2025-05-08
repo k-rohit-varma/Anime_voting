@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{ 
+  id            String      @id       @default(uuid())
+  email         String      @unique   
+  password      String
+  comment       Comment[]
+  profile       Profile?
+  vote          Vote[]
+  // comment       Comments[]   votes   profile
+}
+
+model Contest{
+  id            String      @id                 @default(uuid())
+  startTime     DateTime    @default(now())
+  endTime       DateTime
+  description   String
+  duration      Int
+  comment       Comment[]
+  vote           Vote[]
+  anime         Anime[]
+  hallOfFame    HallOfFame?   
+  //comments votes anime       
+}
+
+model Comment{
+  id            String      @id                 @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId] , references: [id])
+  contestId     String
+  contest       Contest     @relation(fields: [contestId],references: [id])
+  animeId       String
+  anime         Anime       @relation(fields: [animeId],references: [id])
+  //user contest anime  
+}
+
+model Vote{
+  id            String      @id                 @default(uuid())
+  voteValue     Int         @default(10)
+  userId        String      @unique
+  voteTime      DateTime
+  user          User        @relation(fields: [userId],references: [id])
+  contestId     String
+  contest       Contest     @relation(fields: [contestId], references: [id])
+  anime         Anime[]
+  // user contest anime
+}
+
+model HallOfFame{
+  id            String      @id                 @default(uuid())
+  winningDate   DateTime    @default(now())
+  totalVotes    Int
+  contestId     String      @unique
+  contest       Contest     @relation(fields: [contestId],references: [id])
+  animeId       String      @unique
+  anime         Anime       @relation(fields: [animeId],references: [id])
+  // Contest winner -> Anime 
+  // Votes
+}
+
+model Anime{
+  id            String      @id                 @default(uuid())
+  contestId     String  
+  imageUrl      String
+  description   String
+  releasedTime  DateTime     @default(now())
+  contest       Contest[]  
+  comment       Comment[]  
+  vote          Vote[]
+  halloffame    HallOfFame?  
+  
+  // comments halloffame   contest
+}
+
+model Profile{
+  id            String      @id                 @default(uuid())
+  imageUrl       String
+  votes         Int
+  streak        Int
+  description   String
+  userId        String      @unique
+  user          User        @relation(fields: [userId],references: [id])
+  favourite     String[]    @default([])
+}
