@@ -15,11 +15,14 @@ datasource db {
 
 model User{ 
   id            String      @id       @default(uuid())
+  userName      String      @unique
   email         String      @unique   
   password      String
+  isBlocked     Boolean     @default(false)
   comment       Comment[]
   profile       Profile?
   vote          Vote[]
+  role          Role        @default(USER)
   // comment       Comments[]   votes   profile
 }
 
@@ -49,13 +52,14 @@ model Comment{
 
 model Vote{
   id            String      @id                 @default(uuid())
-  voteValue     Int         @default(10)
-  userId        String      @unique
-  voteTime      DateTime
+  voteValue     Int         @default(1)
+  userId        String      
+  voteTime      DateTime    
   user          User        @relation(fields: [userId],references: [id])
-  contestId     String
+  contestId     String      
   contest       Contest     @relation(fields: [contestId], references: [id])
-  anime         Anime[]
+  animeId       String
+  anime         Anime       @relation(fields: [animeId] , references: [id])
   // user contest anime
 }
 
@@ -72,8 +76,7 @@ model HallOfFame{
 }
 
 model Anime{
-  id            String      @id                 @default(uuid())
-  contestId     String  
+  id            String      @id                 @default(uuid()) 
   imageUrl      String
   description   String
   releasedTime  DateTime     @default(now())
@@ -94,4 +97,16 @@ model Profile{
   userId        String      @unique
   user          User        @relation(fields: [userId],references: [id])
   favourite     String[]    @default([])
+}
+
+model Admin{
+  id            String      @id                 @default(uuid())
+  role          Role        @default(ADMIN)
+  email         String
+  password      String
+}
+
+enum Role{
+  USER
+  ADMIN
 }

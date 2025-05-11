@@ -1,8 +1,17 @@
-import express from "express"
-import { userSignUp } from "../controllers/userController"
+import express from "express";
+import {
+  home,
+  userLogin,
+  userLogout,
+  userSignUp,
+} from "../controllers/userController";
+import { userAuthMiddleware } from "../middleware/userAuthMiddleware";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get("/signup",userSignUp)
+router.post("/signup", userSignUp);
+router.post("/login", userLogin);
+router.post("/logout", userLogout);
+router.get("/home", userAuthMiddleware, home);
 
-export default router
+export default router;
