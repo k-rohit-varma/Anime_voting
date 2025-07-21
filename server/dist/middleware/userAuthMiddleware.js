@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userAuthMiddleware = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const keys_1 = require("../keys");
+const user_1 = __importDefault(require("../db/user"));
 const userAuthMiddleware = (req, res, next) => {
     try {
         const token = req.cookies.token;
@@ -16,14 +17,17 @@ const userAuthMiddleware = (req, res, next) => {
             return;
         }
         const isValidToken = jsonwebtoken_1.default.verify(token, keys_1.JWT_SECRET);
-        if (!isValidToken) {
-            res.status(401).send(`You need to login first this is not a valid token`);
-            return;
-        }
+        const user = user_1.default.user.findFirst({
+            where: {
+                email: isValidToken.email,
+            },
+        });
+        console.log("This is the middleware" + user);
+        req.user = user; //extend this from the request
         next();
     }
     catch (err) {
-        res.status(500).send("some thing went worng in the middleware");
+        res.status(401).send("some thing went worng in the middleware");
     }
 };
 exports.userAuthMiddleware = userAuthMiddleware;

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   home,
+  jwtAuth,
   userLogin,
   userLogout,
   userSignUp,
@@ -13,5 +14,5 @@ router.post("/signup", userSignUp);
 router.post("/login", userLogin);
 router.post("/logout", userLogout);
 router.get("/home", userAuthMiddleware, home);
-
+router.post("/auth",jwtAuth)
 export default router;

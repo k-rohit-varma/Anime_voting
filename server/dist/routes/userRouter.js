@@ -11,4 +11,5 @@ router.post("/signup", userController_1.userSignUp);
 router.post("/login", userController_1.userLogin);
 router.post("/logout", userController_1.userLogout);
 router.get("/home", userAuthMiddleware_1.userAuthMiddleware, userController_1.home);
+router.post("/auth", userController_1.jwtAuth);
 exports.default = router;

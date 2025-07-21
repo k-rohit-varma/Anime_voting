@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userLogout = exports.home = exports.userLogin = exports.userSignUp = void 0;
+exports.jwtAuth = exports.userLogout = exports.home = exports.userLogin = exports.userSignUp = void 0;
 const user_1 = __importDefault(require("../db/user"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -31,6 +31,7 @@ const userSignUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 userName,
                 email,
                 password: hashedPassword,
+                isLoggedIn: true,
                 profile: {
                     create: {
                         description: "",
@@ -41,7 +42,12 @@ const userSignUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 },
             },
         });
-        res.status(201).send(`user created successfully` + `${newUser.id}`);
+        const token = jsonwebtoken_1.default.sign({ email }, keys_1.JWT_SECRET);
+        res.cookie("token", token);
+        res.status(201).send({
+            msg: `user created successfully`,
+            user: newUser,
+        });
     }
     catch (err) {
         res.status(500).send(`some thing went wrong in signup`);
@@ -74,6 +80,14 @@ const userLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             email,
         }, jwtSecret);
         console.log(token);
+        yield user_1.default.user.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                isLoggedIn: true,
+            },
+        });
         res.cookie("token", token); //cookie has been set
         res.status(201).send({
             msg: `User logged in successfully`,
@@ -87,11 +101,38 @@ const userLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.userLogin = userLogin;
 //this is just for sample testing of middleware
 const home = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //need to get the user that is currently in the home from middleware module
     res.status(200).send(`The Home page is opening and middleware is working`);
 });
 exports.home = home;
 const userLogout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    res.cookie("token", "");
-    res.status(201).send(`user logged out successfully !!`);
+    try {
+        res.cookie("token", "");
+        res.status(201).send(`user logged out successfully !!`);
+    }
+    catch (err) {
+        console.log(`logout error`);
+        res.status(501).send(`logout error`);
+    }
 });
 exports.userLogout = userLogout;
+const jwtAuth = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const token = yield req.cookies.token;
+        console.log("This is from jwtauth", token);
+        if (!token) {
+            res.status(401).send({
+                msg: "no token",
+            });
+            return;
+        }
+        jsonwebtoken_1.default.verify(token, keys_1.JWT_SECRET);
+        res.status(200).send({
+            msg: "you can go",
+        });
+    }
+    catch (err) {
+        res.status(401).send(`something went wrong`);
+    }
+});
+exports.jwtAuth = jwtAuth;

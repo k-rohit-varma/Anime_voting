@@ -30,6 +30,14 @@ const adminLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 role: "ADMIN",
             },
         });
+        yield user_1.default.admin.update({
+            where: {
+                id: admin === null || admin === void 0 ? void 0 : admin.id,
+            },
+            data: {
+                isLoggedIn: true,
+            },
+        });
         if (!admin) {
             res.status(400).send("Email or password is worng");
             return;
@@ -77,7 +85,7 @@ exports.createContest = createContest;
 const createAnime = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { description, imageUrl, contestId } = req.body;
-        if (!description || !imageUrl) {
+        if (!description || !imageUrl || !contestId) {
             res.status(400).send(`Some Thing went wrong with anime creation`);
             return;
         }

@@ -18,6 +18,14 @@ export const adminLogin = async (req: Request, res: Response) => {
         role: "ADMIN",
       },
     });
+    await db.admin.update({
+      where: {
+        id: admin?.id,
+      },
+      data: {
+        isLoggedIn: true,
+      },
+    });
     if (!admin) {
       res.status(400).send("Email or password is worng");
       return;
@@ -37,10 +45,10 @@ export const adminLogin = async (req: Request, res: Response) => {
   }
 };
 
-export const adminLogout = async (req :Request , res :Response) =>{
-    res.cookie("admin_token","");
-    res.status(201).send(`admin logout successful !!!`)
-}
+export const adminLogout = async (req: Request, res: Response) => {
+  res.cookie("admin_token", "");
+  res.status(201).send(`admin logout successful !!!`);
+};
 
 // for contest creation we need the contest , anime and voting
 export const createContest = async (req: Request, res: Response) => {
